@@ -76,15 +76,28 @@ pyinstaller --noconfirm --onefile --windowed \
 - Output appears in `dist/MusicDownloader` (or `dist/MusicDownloader.app` on macOS).
 - **Note:** `yt-dlp` and `ffmpeg` are *not* bundled by default and must still be available on the target machine. For a fully self-contained build you'd need to bundle the FFmpeg binary as a resource — see the PyInstaller docs on `--add-data`.
 
-> ⚠️ PyInstaller builds are per-OS. Build on macOS for Mac users, on Windows for Windows users.
+### ⚠️ FFmpeg is NOT bundled — required on the target machine
 
-## 🔒 Privacy Note
+PyInstaller does **not** bundle `ffmpeg` or `yt-dlp` by default. The executable will **fail to convert audio** on any machine that does not have FFmpeg installed. Options:
 
-This project contains no hardcoded credentials. The `.cache` file (Spotify token) is generated at runtime and is **excluded by `.gitignore`** — it never gets uploaded. Each user starts fresh.
+- Tell users to install FFmpeg separately (`brew install ffmpeg` / download from ffmpeg.org).
+- Or bundle the FFmpeg binary yourself with PyInstaller's `--add-data` flag and modify `app.py` to locate it at runtime. (See PyInstaller docs.)
+- The app currently hardcodes `--ffmpeg-location ~/.spotdl/ffmpeg` — if FFmpeg lives elsewhere on the user's machine, this path must be adjusted.
+
+> ⚠️ PyInstaller builds are per-OS. Build on macOS for Mac users, on Windows for Windows users. A build made on macOS **will not run** on Windows.
+
+## 🔒 Privacy & Credentials
+
+**This project contains no hardcoded credentials.** Key points:
+
+- The `.cache` file (Spotify access token) is generated at **runtime** on each user's own machine and is **excluded by `.gitignore`** — it is never uploaded to GitHub.
+- Spotipy writes this token to `~/.cache` per its [standard caching behavior](https://spotipy.readthedocs.io/). It is a short-lived bearer token (typically expires in ~3600 seconds).
+- **If you ever accidentally expose a `.cache` file** (e.g. committed it, pasted it somewhere), revoke it immediately at **Spotify → Account → [Apps](https://www.spotify.com/account/apps/)** and remove local `~/.cache`.
+- Each fresh user / fresh clone starts with no token; a new one is minted on first use, bound to *their* Spotify account.
 
 ## 📝 Disclaimer
 
-This tool is intended for backing up music you personally own. Please follow local copyright law and the Spotify / YouTube Terms of Service. Do not use it for distribution or commercial purposes. Users are responsible for their own legal compliance.
+This tool is intended for backing up music you personally own. Please follow local copyright law and the Spotify / YouTube Terms of Service. Do not use it for distribution or commercial purposes. **Users are solely responsible for their own legal compliance.** The author of this repository takes no responsibility for misuse.
 
 ## 📂 Project Structure
 

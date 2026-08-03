@@ -76,15 +76,28 @@ pyinstaller --noconfirm --onefile --windowed \
 - 產出在 `dist/MusicDownloader`(macOS 為 `dist/MusicDownloader.app`)。
 - **注意:** `yt-dlp` 與 `ffmpeg` 預設不會被打包進去,目標電腦仍需有這兩個工具。若要完全自帶,需用 PyInstaller 的 `--add-data` 把 FFmpeg 二進位一起包進去,詳見 PyInstaller 官方文件。
 
-> ⚠️ PyInstaller 產物是「一個作業系統一份」:在 macOS 上打包只能給 Mac 用,在 Windows 上打包只能給 Windows 用。
+### ⚠️ FFmpeg 不會被打包 — 目標電腦必須自己裝
 
-## 🔒 隱私說明
+PyInstaller 預設**不會**把 `ffmpeg`、`yt-dlp` 包進執行檔。在沒有 FFmpeg 的電腦上,執行檔會**無法轉檔、直接失敗**。解法:
 
-本專案不含任何寫死的帳號密碼。執行時產生的 `.cache`(Spotify token)是本機暫存,已透過 `.gitignore` 排除,**不會被上傳**。每個使用者都會從乾淨狀態開始。
+- 請使用者另行安裝 FFmpeg(`brew install ffmpeg` / 到 ffmpeg.org 下載)。
+- 或你自己用 PyInstaller 的 `--add-data` 把 FFmpeg 二進位包進去,並修改 `app.py` 讓它執行時找到該路徑(詳見 PyInstaller 官方文件)。
+- 程式目前寫死 `--ffmpeg-location ~/.spotdl/ffmpeg`,若使用者電腦的 FFmpeg 在別處,需調整這個路徑。
+
+> ⚠️ PyInstaller 產物是「一個作業系統一份」:在 macOS 上打包只能給 Mac 用,在 Windows 上打包只能給 Windows 用。**macOS 打的檔在 Windows 上跑不起來。**
+
+## 🔒 隱私與憑證
+
+**本專案不含任何寫死的帳號密碼。**重點說明:
+
+- 執行時產生的 `.cache`(Spotify access token)是在**每個使用者自己的電腦上**臨時產生,已透過 `.gitignore` 排除,**不會被上傳到 GitHub**。
+- 這是 spotipy 依其[標準快取行為](https://spotipy.readthedocs.io/)寫到 `~/.cache` 的短期 bearer token(通常約 3600 秒過期)。
+- **若你不小心把 `.cache` 暴露了**(例如 commit 進 repo、貼到某處),請立刻到 **Spotify → 帳號 → [已連結應用程式](https://www.spotify.com/account/apps/)** 撤銷授權,並刪除本機 `~/.cache`。
+- 每個全新使用者 / 全新 clone 都沒有 token,第一次使用時會產生一個新的、綁定在**他自己** Spotify 帳號下的 token。
 
 ## 📝 使用須知
 
-本工具以「個人備份自己擁有的音樂」為目的。請遵守各地著作權法與 Spotify、YouTube 的服務條款,勿用於散布或商業用途。使用者需自負一切法律責任。
+本工具以「個人備份自己擁有的音樂」為目的。請遵守各地著作權法與 Spotify、YouTube 的服務條款,勿用於散布或商業用途。**使用者需自負一切法律責任,本儲存庫作者不對任何濫用行為負責。**
 
 ## 📂 專案結構
 

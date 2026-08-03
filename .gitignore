@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Python 虛擬環境（體積大，每個人自己建立即可）
+venv/
+__pycache__/
+*.pyc
+
+# 敏感憑證（Spotify token 等，絕對不能上傳）
+.cache
+.gradio/
+
+# 下載輸出與暫存
+*.mp3
+*.m4a
+*.webm
+*.part
+Downloads/

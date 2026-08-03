@@ -1,69 +1,104 @@
-# 🎵 專屬音樂下載器（全自動免 API 版）
+# 🎵 Spotify Music Downloader (No-API Edition)
 
-一個用 Gradio 做的圖形化介面，貼上 Spotify 歌曲／專輯／歌單連結，就能自動解析曲目並逐首下載為 320kbps MP3。不需要 Spotify API Key、不需要 Premium 帳號。
+A Gradio-based graphical interface: paste a Spotify **track / album / playlist** link and it automatically resolves the tracks and downloads each one as a **320 kbps MP3**. **No Spotify API key required. No Premium account required.**
 
-## ✨ 功能特色
+> 📖 中文版說明請見 [README.zh-TW.md](README.zh-TW.md)
 
-- **貼連結自動解析**：直接貼上 Spotify 連結，自動拆解歌單／專輯內所有歌曲。
-- **免 API Key**：透過 Spotify 公開嵌入頁面解析，不需申請開發者帳號。
-- **也支援 CSV**：可用 [Exportify](https://github.com/exportify/exportify) 匯出的 CSV 當來源。
-- **智慧跳過已下載**：自動比對目標資料夾現有的 `.mp3`，避免重複下載。
-- **失敗自動重試**：一鍵重新下載失敗的歌曲。
-- **即時進度更新**：畫面每秒刷新，顯示目前下載進度與成敗狀態。
-- **內嵌封面與資訊**：自動嵌入縮圖與 ID3 中繼資料。
+---
 
-## 🚀 使用方式
+## ✨ Features
 
-### macOS（最簡單）
+- **Paste-and-resolve** — Drop in a Spotify link; tracks are parsed automatically via Spotify's public embed page.
+- **No API key** — Uses Spotify's public embed page, no developer account needed.
+- **CSV supported** — Can also import a CSV exported from [Exportify](https://github.com/exportify/exportify).
+- **Skip existing** — Compares against existing `.mp3` files in the target folder to avoid duplicates.
+- **Retry failures** — One click re-downloads the songs that failed.
+- **Live progress** — UI refreshes every second to show current download status.
+- **Embeds cover & metadata** — Automatically embeds thumbnails and ID3 tags.
 
-1. 下載或 Clone 本專案。
-2. 雙擊 `start.command`，它會自動建立虛擬環境、安裝所需套件並開啟網頁介面。
+## 🚀 Quick Start
 
-### 手動執行（跨平台）
+### macOS (easiest)
+
+1. Download or clone this project.
+2. Double-click `start.command`. It creates a virtualenv, installs the required packages, and opens the web UI.
+
+### Manual (cross-platform)
 
 ```bash
-# 建立虛擬環境
+# Clone
+git clone https://github.com/nashwu0117/MusicDownloader.git
+cd MusicDownloader
+
+# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-# 安裝依賴
-pip install gradio yt-dlp pandas spotipy
+# Install dependencies
+pip install -r requirements.txt
 
-# 啟動
+# Launch
 python3 app.py
 ```
 
-啟動後會自動在瀏覽器打開圖形介面。
+The app launches automatically opens in your default browser.
 
-## 📋 依賴套件
+## 📋 Dependencies
 
-- `gradio` — 網頁介面
-- `yt-dlp` — YouTube 下載核心
-- `pandas` — 讀取 CSV
-- `spotipy` — （備用）Spotify API
+See [requirements.txt](requirements.txt):
 
-## ⚠️ 系統需求
+- `gradio` — web UI
+- `yt-dlp` — download core
+- `pandas` — CSV parsing
+- `spotipy` — (optional) Spotify API fallback
 
-- Python 3.8 以上
-- **FFmpeg**：轉檔成 MP3 需要 FFmpeg。程式預設使用 `~/.spotdl/ffmpeg`。
-  - 若沒有安裝，可透過 [spotDL](https://github.com/spotDL/spotify-downloader) 安裝：`pip install spotdl && spotdl --download-ffmpeg`
-  - 或自行安裝 FFmpeg 並修改 `app.py` 中的 `--ffmpeg-location` 路徑。
+## ⚠️ Requirements
 
-## 📝 使用須知
+- **Python 3.8+**
+- **FFmpeg** — Required to convert to MP3. The app defaults to `~/.spotdl/ffmpeg`.
+  - Install via [spotDL](https://github.com/spotDL/spotify-downloader): `pip install spotdl && spotdl --download-ffmpeg`
+  - Or install FFmpeg yourself and edit `--ffmpeg-location` in `app.py`.
 
-本工具以「個人備份自己擁有的音樂」為目的。請遵守各地著作權法與 Spotify、YouTube 的服務條款，勿用於散布或商業用途。使用者需自負一切法律責任。
+## 📦 Build a Standalone Executable (PyInstaller)
 
-## 📂 專案結構
+Want a single `.app` / `.exe` you can distribute without requiring Python? Use PyInstaller.
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build (one-file, with app icon if you have one)
+pyinstaller --noconfirm --onefile --windowed \
+  --name "MusicDownloader" \
+  app.py
+```
+
+- Output appears in `dist/MusicDownloader` (or `dist/MusicDownloader.app` on macOS).
+- **Note:** `yt-dlp` and `ffmpeg` are *not* bundled by default and must still be available on the target machine. For a fully self-contained build you'd need to bundle the FFmpeg binary as a resource — see the PyInstaller docs on `--add-data`.
+
+> ⚠️ PyInstaller builds are per-OS. Build on macOS for Mac users, on Windows for Windows users.
+
+## 🔒 Privacy Note
+
+This project contains no hardcoded credentials. The `.cache` file (Spotify token) is generated at runtime and is **excluded by `.gitignore`** — it never gets uploaded. Each user starts fresh.
+
+## 📝 Disclaimer
+
+This tool is intended for backing up music you personally own. Please follow local copyright law and the Spotify / YouTube Terms of Service. Do not use it for distribution or commercial purposes. Users are responsible for their own legal compliance.
+
+## 📂 Project Structure
 
 ```
 MusicDownloader/
-├── app.py            # 主程式（Gradio 介面 + 下載邏輯）
-├── start.command     # macOS 一鍵啟動腳本
+├── app.py                 # Main app (Gradio UI + download logic)
+├── start.command          # macOS one-click launcher
+├── requirements.txt       # Python dependencies
 ├── .gitignore
-├── README.md
-└── LICENSE
+├── LICENSE                # MIT
+├── README.md              # English (this file)
+└── README.zh-TW.md        # 繁體中文
 ```
 
-## 📄 授權
+## 📄 License
 
-MIT License — 見 [LICENSE](LICENSE)。
+MIT License — see [LICENSE](LICENSE).

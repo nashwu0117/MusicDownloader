@@ -9,6 +9,7 @@ import time
 import threading
 import queue
 import urllib.request
+import yt_dlp
 
 state = {
     "history": "尚未開始。",
@@ -96,6 +97,56 @@ def parse_spotify_url_no_api(spotify_url):
 
     return songs
 
+def detect_platform(url: str) -> str:
+    u = url.lower()
+    if "spotify.com" in u:
+        return "Spotify"
+    if "music.youtube.com" in u:
+        return "YouTube Music"
+    if "youtube.com" in u or "youtu.be" in u:
+        return "YouTube"
+    if "soundcloud.com" in u:
+        return "SoundCloud"
+    return "未知平台"
+
+def parse_url_with_ytdlp(url: str):
+    """用 yt-dlp 原生 extractor 解析 YouTube / YouTube Music / SoundCloud 的播放清單或單曲。
+    回傳統一格式 [{"track", "artist"}, ...]。解析失敗時拋例外（由呼叫端決定是否 fallback）。"""
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extract_flat": False,
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except Exception as e:
+        raise ValueError(f"yt-dlp 解析失敗: {e}")
+
+    if info is None:
+        raise ValueError("yt-dlp 未回傳任何資料。")
+
+    if info.get("_type") == "playlist":
+        entries = info.get("entries") or []
+    else:
+        entries = [info]
+
+    songs = []
+    for e in entries:
+        if not e:
+            continue
+        title = e.get("title") or e.get("track")
+        artist = (e.get("artist") or e.get("uploader")
+                  or e.get("channel") or e.get("album_artist") or "")
+        if title:
+            songs.append({"track": title, "artist": artist})
+
+    if not songs:
+        raise ValueError("yt-dlp 解析後未找到任何曲目。")
+
+    return songs
+
 def run_yt_dlp(cmd, timeout=180):
     output_queue = queue.Queue()
 
@@ -163,10 +214,15 @@ def download_worker(csv_path, spotify_url, output_path):
     source_label = ""
 
     if url_input:
-        update_state(history="🔍 正在自動解析 Spotify 連結曲目中...", status="解析網址中...", failed=format_failed_list())
+        platform = detect_platform(url_input)
+        update_state(history=f"🔍 正在自動解析 {platform} 連結曲目中...", status=f"解析 {platform} 網址中...", failed=format_failed_list())
         try:
-            songs = parse_spotify_url_no_api(url_input)
-            source_label = "Spotify 連結 (免 API 自動解析)"
+            if platform == "Spotify":
+                songs = parse_spotify_url_no_api(url_input)
+                source_label = "Spotify 連結 (免 API 自動解析)"
+            else:
+                songs = parse_url_with_ytdlp(url_input)
+                source_label = f"{platform} 連結 (yt-dlp 原生解析)"
         except Exception as e:
             update_state(history=f"❌ 解析失敗: {e}", status="錯誤", failed=format_failed_list())
             state["is_running"] = False
@@ -347,13 +403,13 @@ def poll_state():
         return state["history"], state["status"], state["failed"]
 
 with gr.Blocks(title="🎵 專屬音樂下載器") as app:
-    gr.Markdown("## 🎵 專屬音樂下載器 (全自動免 API 版)\n* **貼連結自動解析**：直接貼上 Spotify 歌曲 / 專輯 / 歌單連結，自動拆解歌曲並逐首下載。\n* **智慧跳過已下載檔**：自動比對目標資料夾的 `.mp3` 檔案，避免重複下載。\n* **即時進度更新**：每秒刷新畫面，清晰顯示目前下載進度與成敗。")
+    gr.Markdown("## 🎵 專屬音樂下載器 (全自動免 API 版)\n* **貼連結自動解析**：支援 Spotify、YouTube、YouTube Music、SoundCloud 連結（歌曲 / 專輯 / 歌單 / 播放清單皆可），自動偵測平台並逐首下載。\n* **智慧跳過已下載檔**：自動比對目標資料夾的 `.mp3` 檔案，避免重複下載。\n* **即時進度更新**：每秒刷新畫面，清晰顯示目前下載進度與成敗。")
 
     with gr.Row():
         with gr.Column(scale=1):
             spotify_url_input = gr.Textbox(
-                label="1️⃣ 貼上 Spotify 連結（歌曲 / 專輯 / 歌單皆可）",
-                placeholder="例如：https://open.spotify.com/album/2k4FmEtXR0WiDW0Ac2QArT"
+                label="1️⃣ 貼上音樂連結（Spotify / YouTube / YouTube Music / SoundCloud）",
+                placeholder="Spotify、YouTube 播放清單、music.youtube.com、soundcloud.com/...皆可貼上"
             )
             gr.Markdown("— 或者 —")
             csv_input = gr.File(label="上傳從 Exportify 匯出的 CSV 檔案")
@@ -378,4 +434,5 @@ with gr.Blocks(title="🎵 專屬音樂下載器") as app:
     timer = gr.Timer(1)
     timer.tick(fn=poll_state, outputs=[history_out, term_out, failed_out])
 
-app.queue().launch(inbrowser=True)
+if __name__ == "__main__":
+    app.queue().launch(inbrowser=True)

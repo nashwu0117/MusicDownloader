@@ -2,9 +2,13 @@
 
 用 Gradio 做的圖形化介面:貼上 Spotify **歌曲／專輯／歌單**連結,就能自動解析曲目並逐首下載為 **320kbps MP3**。**不需要 Spotify API Key、不需要 Premium 帳號。**
 
-> 📖 English version: [README.md](README.md)
+> 📖 English version: [README.md](README.md) ・ 📄 更多介紹：[ABOUT.md](ABOUT.md)
 
 ---
+
+## 📖 關於本專案（About）
+
+「專屬音樂下載器」是一個 MIT 授權的開源工具，目標是讓「備份自己喜歡的音樂」變得很簡單：貼上連結、按一個按鈕，剩下的交給程式。你不需要 API Key、不需要 Premium 帳號、也不需要寫任何 Code。完整介紹（緣起、運作流程、技術棧）見 [ABOUT.md](ABOUT.md)。
 
 ## ✨ 功能特色
 
@@ -108,6 +112,7 @@ MusicDownloader/
 ├── requirements.txt       # Python 依賴
 ├── .gitignore
 ├── LICENSE                # MIT 授權
+├── ABOUT.md               # 專案介紹
 ├── README.md              # 英文版
 └── README.zh-TW.md        # 繁體中文(本檔)
 ```

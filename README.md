@@ -2,7 +2,7 @@
 
 A Gradio-based graphical interface: paste a Spotify **track / album / playlist** link and it automatically resolves the tracks and downloads each one as a **320 kbps MP3**. **No Spotify API key required. No Premium account required.**
 
-> 📖 中文版說明請見 [README.zh-TW.md](README.zh-TW.md)
+> 📖 中文版說明請見 [README.zh-TW.md](README.zh-TW.md) ・ Full story: [ABOUT.md](ABOUT.md)
 
 ---
 
@@ -108,6 +108,7 @@ MusicDownloader/
 ├── requirements.txt       # Python dependencies
 ├── .gitignore
 ├── LICENSE                # MIT
+├── ABOUT.md               # Project introduction
 ├── README.md              # English (this file)
 └── README.zh-TW.md        # 繁體中文
 ```

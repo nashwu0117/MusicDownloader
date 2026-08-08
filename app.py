@@ -405,24 +405,47 @@ def poll_state():
 with gr.Blocks(title="🎵 專屬音樂下載器") as app:
     gr.Markdown("## 🎵 專屬音樂下載器 (全自動免 API 版)\n* **貼連結自動解析**：支援 Spotify、YouTube、YouTube Music、SoundCloud 連結（歌曲 / 專輯 / 歌單 / 播放清單皆可），自動偵測平台並逐首下載。\n* **智慧跳過已下載檔**：自動比對目標資料夾的 `.mp3` 檔案，避免重複下載。\n* **即時進度更新**：每秒刷新畫面，清晰顯示目前下載進度與成敗。")
 
-    with gr.Row():
-        with gr.Column(scale=1):
-            spotify_url_input = gr.Textbox(
-                label="1️⃣ 貼上音樂連結（Spotify / YouTube / YouTube Music / SoundCloud）",
-                placeholder="Spotify、YouTube 播放清單、music.youtube.com、soundcloud.com/...皆可貼上"
-            )
-            gr.Markdown("— 或者 —")
-            csv_input = gr.File(label="上傳從 Exportify 匯出的 CSV 檔案")
-            path_input = gr.Textbox(
-                label="2️⃣ 自訂儲存路徑",
-                value="~/Downloads/Spotify音樂"
-            )
-            run_btn = gr.Button("🚀 開始下載", variant="primary")
-            retry_btn = gr.Button("🔄 重新下載失敗項目", variant="secondary")
-        with gr.Column(scale=1):
-            history_out = gr.Textbox(label="📋 整體進度 (歷史紀錄)", lines=15, value="尚未開始。")
-            term_out = gr.Textbox(label="💻 目前執行狀態 (每秒自動更新)", lines=2, value="等待中...")
-            failed_out = gr.Textbox(label="⚠️ 下載失敗清單", lines=5, value="✨ 目前沒有下載失敗的歌曲！")
+    with gr.Tab("⬇️ 下載"):
+        with gr.Row():
+            with gr.Column(scale=1):
+                spotify_url_input = gr.Textbox(
+                    label="1️⃣ 貼上音樂連結（Spotify / YouTube / YouTube Music / SoundCloud）",
+                    placeholder="Spotify、YouTube 播放清單、music.youtube.com、soundcloud.com/...皆可貼上"
+                )
+                gr.Markdown("— 或者 —")
+                csv_input = gr.File(label="上傳從 Exportify 匯出的 CSV 檔案")
+                path_input = gr.Textbox(
+                    label="2️⃣ 自訂儲存路徑",
+                    value="~/Downloads/Spotify音樂"
+                )
+                run_btn = gr.Button("🚀 開始下載", variant="primary")
+                retry_btn = gr.Button("🔄 重新下載失敗項目", variant="secondary")
+            with gr.Column(scale=1):
+                history_out = gr.Textbox(label="📋 整體進度 (歷史紀錄)", lines=15, value="尚未開始。")
+                term_out = gr.Textbox(label="💻 目前執行狀態 (每秒自動更新)", lines=2, value="等待中...")
+                failed_out = gr.Textbox(label="⚠️ 下載失敗清單", lines=5, value="✨ 目前沒有下載失敗的歌曲！")
+
+    with gr.Tab("ℹ️ 關於"):
+        gr.Markdown(
+            "### 🎵 專屬音樂下載器（全自動免 API 版）\n"
+            "\n"
+            "**這是什麼？**\n"
+            "- 一個以「備份自己喜歡的音樂」為出發點的工具：貼上連結、按一個按鈕，把歌曲存成 320kbps MP3。\n"
+            "- 支援 Spotify / YouTube / YouTube Music / SoundCloud 的歌曲、專輯、歌單連結，也會自動嵌入封面與 ID3 標籤。\n"
+            "- 不需要 Spotify API Key、不需要 Premium 帳號、不需要寫任何 Code。\n"
+            "\n"
+            "**技術棧**\n"
+            "- **介面**：Gradio（網頁圖形介面）\n"
+            "- **下載核心**：yt-dlp（備用 spotipy / Exportify CSV 匯入）\n"
+            "- **轉檔**：FFmpeg（需自行安裝，預設位置 `~/.spotdl/ffmpeg`）\n"
+            "\n"
+            "**使用須知**\n"
+            "- 本工具以「個人備份自己擁有的音樂」為目的，請遵守各地著作權法與平台服務條款，勿用於散布或商業用途。\n"
+            "- 使用者需自負一切法律責任。\n"
+            "\n"
+            "**授權**\n"
+            "- MIT License"
+        )
 
     run_btn.click(
         fn=start_download,
